@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Activate Badge | Youth Startups</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Poppins', sans-serif;
+            background-color: #f0f4f8;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            padding: 20px;
+        }
+        .card {
+            background: white;
+            padding: 40px 30px;
+            border-radius: 20px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+            text-align: center;
+            max-width: 350px;
+            width: 100%;
+        }
+        .logo { width: 150px; margin-bottom: 20px; }
+        h2 { color: #051024; margin-top: 0; font-size: 1.5rem; }
+        p { color: #64748b; font-size: 0.9rem; margin-bottom: 25px; }
+        input {
+            width: 100%;
+            box-sizing: border-box;
+            padding: 15px;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            font-size: 1rem;
+            margin-bottom: 20px;
+            font-family: 'Poppins', sans-serif;
+            transition: border-color 0.2s;
+        }
+        input:focus { outline: none; border-color: #0082c8; }
+        button {
+            width: 100%;
+            background-color: #0082c8;
+            color: white;
+            padding: 15px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        button:hover { background-color: #006bb3; }
+        #status { margin-top: 20px; font-size: 0.9rem; font-weight: 600; height: 20px; }
+    </style>
+</head>
+<body>
+    <div id="ios-warning" style="display: none; background-color: #e67e22; color: white; text-align: center; padding: 12px; font-weight: bold; position: fixed; top: 0; left: 0; z-index: 1000; width: 100%; box-shadow: 0px 4px 6px rgba(0,0,0,0.1);">
+        ⚠️ Utilisateurs iPhone : Pour que vos connexions soient sauvegardées, scannez les badges avec votre application <b>Appareil Photo standard</b>, et non avec le scanner de code QR du centre de contrôle.
+    </div>
+
+    <div class="card">
+        <div id="activation-step">
+            <img src="images\logo ys.png" alt="Youth Startups" class="logo">
+            <h2>Activate Badge</h2>
+            <p>Enter your registration email to link this device to your smart badge.</p>
+            <input type="email" id="emailInput" placeholder="name@example.com">
+            <button id="activateBtn" onclick="activateUser()">Activate Device</button>
+            <div id="status"></div>
+        </div>
+
+        <div id="success-step" style="display: none; text-align: center; padding: 10px 0;">
+            <div style="font-size: 60px; margin-bottom: 20px;">✅</div>
+            <h2 style="color: #4c5b73; margin-bottom: 15px;">Badge Activé avec Succès !</h2>
+            <p style="color: #555; font-size: 16px; line-height: 1.5; margin-bottom: 30px;">
+                Votre téléphone est maintenant lié à votre profil.
+            </p>
+            <div style="background-color: #fff4e6; border-left: 5px solid #e67e22; padding: 20px; border-radius: 8px; text-align: left;">
+                <h3 style="color: #e67e22; margin-top: 0; font-size: 18px;">Prochaine étape :</h3>
+                <ol style="color: #333; margin-bottom: 0; padding-left: 20px; line-height: 1.6;">
+                    <li style="margin-bottom: 10px;">Fermez cette page web.</li>
+                    <li style="margin-bottom: 10px;">Ouvrez l'application <b>Appareil Photo</b> de votre téléphone.</li>
+                    <li>Scannez les badges des autres participants pour les ajouter à votre réseau !</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            var isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+            if (isIOS) {
+                document.getElementById('ios-warning').style.display = 'block';
+            }
+        });
+
+        const supabaseUrl = 'https://*****.supabase.co';
+        const supabaseKey = '*****';
+        const supabaseDb = window.supabase.createClient(supabaseUrl, supabaseKey, {
+            db: { schema: 'youth_startup' }
+        });
+
+        async function activateUser() {
+            const email = document.getElementById('emailInput').value;
+            const statusMsg = document.getElementById('status');
+            const btn = document.getElementById('activateBtn');
+            
+            if(!email) {
+                statusMsg.style.color = "red";
+                statusMsg.innerText = "Please enter an email.";
+                return;
+            }
+
+            btn.innerText = "Checking...";
+            btn.style.opacity = "0.7";
+
+            const { data: userId, error } = await supabaseDb.rpc('activate_device', { 
+                p_email: email 
+            });
+
+            if (error || !userId) {
+                btn.innerText = "Activate Device";
+                btn.style.opacity = "1";
+                statusMsg.style.color = "red";
+                statusMsg.innerText = "Email not found.";
+                return;
+            }
+
+            localStorage.setItem('scanner_id', userId);
+            
+            document.getElementById('activation-step').style.display = 'none';
+            document.getElementById('success-step').style.display = 'block';
+        }
+    </script>
+</body>
+</html>

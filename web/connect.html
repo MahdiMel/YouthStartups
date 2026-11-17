@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Connection Validation</title>
+    
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <style>
+        :root {
+            --bg-success: #10b981; 
+            --bg-loading: #0f172a; 
+            --accent-color: #ffffff;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            background-color: var(--bg-success); 
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            color: var(--accent-color);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: center;
+            height: 100vh;
+            text-align: center;
+            overflow: hidden;
+            transition: background-color 0.3s ease;
+        }
+
+        #ios-warning {
+            display: none; 
+            font-size: 13px;
+            background: rgba(0, 0, 0, 0.25);
+            color: rgba(255, 255, 255, 0.95);
+            width: 100%;
+            padding: 12px 15px;
+            box-sizing: border-box;
+            font-weight: 500;
+            backdrop-filter: blur(5px);
+        }
+
+        .content {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            gap: 20px;
+        }
+
+        #spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            border-top: 4px solid var(--accent-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        #successIcon {
+            display: none;
+            width: 80px;
+            height: 80px;
+            animation: scaleUp 0.5s ease-out forwards;
+        }
+
+        @keyframes scaleUp {
+            0% { transform: scale(0); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        #statusMessage {
+            font-size: 24px;
+            font-weight: 700;
+            margin: 0;
+            letter-spacing: 0.5px;
+        }
+
+        .redirect-hint {
+            font-size: 15px;
+            font-weight: 400;
+            opacity: 0.8;
+            margin-top: -10px;
+        }
+
+        .logo-container {
+            margin-bottom: 40px;
+        }
+        .logo-container img {
+            height: 60px; 
+            object-fit: contain;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="ios-warning">
+        💡 <b>Utilisateurs iPhone :</b> Pour sauvegarder vos connexions, scannez avec l'application Appareil Photo standard.
+    </div>
+
+    <div class="content">
+        <div id="spinner"></div>
+
+        <svg id="successIcon" viewBox="0 0 52 52" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="26" cy="26" r="25" fill="none"/>
+            <path fill="none" stroke="#ffffff" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" d="M14.1 27.2l7.1 7.2 16.7-16.8" />
+        </svg>
+
+        <h1 id="statusMessage">Processing...</h1>
+        <div id="subStatusMessage" class="redirect-hint"></div>
+    </div>
+
+    <div class="logo-container">
+        <img src="images\logo JCI.png" alt="JCI Monastir">
+    </div>
+
+    <script>
+        const supabaseUrl = '*****';
+        const supabaseKey = '*****';
+        
+        const supabaseDb = window.supabase.createClient(supabaseUrl, supabaseKey, {
+            db: { schema: 'youth_startup' }
+        });
+
+        async function processScan() {
+            const scannerId = localStorage.getItem('scanner_id');
+            if (!scannerId) { window.location.replace('index.html'); return; }
+
+            const urlParams = new URLSearchParams(window.location.search);
+            const scannedId = urlParams.get('scanned');
+            
+            const statusMsg = document.getElementById('statusMessage');
+            const subStatusMsg = document.getElementById('subStatusMessage');
+            const spinner = document.getElementById('spinner');
+            const successIcon = document.getElementById('successIcon');
+
+            if (!scannedId) { 
+                spinner.style.display = "none";
+                statusMsg.innerText = "Invalid Badge"; 
+                return; 
+            }
+
+            statusMsg.innerText = "Saving connection...";
+
+            const { data: redirectUrl, error } = await supabaseDb.rpc('record_scan', { 
+                p_scanner: scannerId, 
+                p_scanned: scannedId 
+            });
+
+            if (error) {
+                spinner.style.display = "none";
+                statusMsg.innerText = "Error saving connection.";
+                console.error(error);
+                return;
+            }
+
+            // --- SUCCÈS ---
+            document.body.style.backgroundColor = "#10b981";
+            spinner.style.display = "none"; 
+            successIcon.style.display = "block";
+            
+            statusMsg.innerText = "Connection Saved!";
+            subStatusMsg.innerText = "Redirecting to profile...";
+            
+            setTimeout(() => {
+                if (redirectUrl) {
+                    window.location.replace(redirectUrl);
+                } else {
+                    statusMsg.innerText = "No profile URL found.";
+                    subStatusMsg.innerText = "";
+                }
+            }, 1500); 
+        }
+
+        document.addEventListener("DOMContentLoaded", function() {
+            var isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+            if (isIOS) {
+                document.getElementById('ios-warning').style.display = 'block';
+            }
+        });
+
+        processScan();
+    </script>
+</body>
+</html>

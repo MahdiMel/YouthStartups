@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Youth Startups 2.0 | Digital Badge</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Poppins', sans-serif;
+            background-color: #050a15;
+            background-image: url("images\\background.jpeg");
+            background-size: cover;
+            background-position: right center;
+            background-repeat: no-repeat;
+            color: white;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            text-align: center;
+            padding: 20px;
+        }
+        .container {
+            background: rgba(5, 10, 21, 0.85);
+            padding: 40px;
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+            max-width: 400px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+        .logo { width: 200px; margin-bottom: 20px; }
+        .motto {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #48c4d8;
+            margin-bottom: 30px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .btn {
+            background: linear-gradient(90deg, #0082c8, #48c4d8);
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 50px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(72, 196, 216, 0.4);
+        }
+        #ios-warning {
+            display: none; 
+            font-size: 13px;
+            background: rgba(255, 255, 255, 0.15); 
+            color: #ffffff;
+            width: 100%;
+            padding: 12px 15px;
+            text-align: center;
+            box-sizing: border-box;
+            font-weight: 500;
+            backdrop-filter: blur(5px);
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+    </style>
+</head>
+<body>
+    <div id="ios-warning">
+    💡 <b>Utilisateurs iPhone :</b> veuillez utilisez l'application Appareil Photo standard et non QR code scanner
+    </div>
+    <div class="container">
+        <img src="images\logo ys.png" alt="Youth Startups" class="logo">
+        <div class="motto">INNOVATE. EMPOWER. IMPACT.</div>
+        <p style="font-size: 0.9rem; color: #a0aec0; margin-bottom: 30px;">
+            learn, connect, and grow with us.
+        </p>
+        <a href="activate.html" class="btn">Activate My Badge</a>
+    </div>
+    <script>
+    document.addEventListener("DOMContentLoaded", function() {
+    var isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+    
+    if (isIOS) {
+        document.getElementById('ios-warning').style.display = 'block';
+    }
+    });
+    </script>
+</body>
+</html>
